@@ -56,14 +56,14 @@ public class BraceletMainActivity extends Activity {
     /**
      * Service where to send data.
      * Discovered empirically,
-     * it would be possible to find it programmatically by parsing the GATT messages.
+     * it would be possible to find it programatically by parsing the GATT messages.
      */
     private final String serviceUUID = "00002220-0000-1000-8000-00805f9b34fb";
 
     /**
      * Characteristic where to send data.
      * Discovered empirically,
-     * it would be possible to find it programmatically by parsing the GATT messages.
+     * it would be possible to find it programatically by parsing the GATT messages.
      */
     private final String sendCharacteristicUUID = "00002222-0000-1000-8000-00805f9b34fb";
 
@@ -80,23 +80,17 @@ public class BraceletMainActivity extends Activity {
     /**
      * Tells if we are connected or not.
      */
-    private boolean braceletConnected;
-
-    /**
-     * Tells if we are connected or not.
-     */
-    private boolean mantraConnected;
+    private boolean connected;
 
     /**
      * Used for logging.
      */
-    private static final String TAG = "Android Bracelet";
+    private static final String TAG = "RFDuinoRGB";
 
 
     public BraceletMainActivity(){
         super();
-        mantraConnected = false;
-        braceletConnected = false;
+        connected = false;
         handler = new Handler();
     }
 
@@ -220,7 +214,7 @@ public class BraceletMainActivity extends Activity {
                 return;
             }
 
-            if(device.getName().compareToIgnoreCase("lightVest") == 0 || device.getName().compareToIgnoreCase("Bracelet") == 0 || device.getName().compareToIgnoreCase("mantraBand") == 0){
+            if(device.getName().compareToIgnoreCase("lightVest") == 0 || device.getName().compareToIgnoreCase("Bracelet") == 0){
                 //Got a RFduino !
                 connected = true;
                 bluetoothAdapter.stopLeScan(handleScan);
@@ -236,12 +230,6 @@ public class BraceletMainActivity extends Activity {
                         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                             Log.d(TAG, "Disconnected from RFduino.");
                         }
-                    }
-
-                    @Override
-                    public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-                        Log.d(TAG, "Characteristic Changed on GATT:" + gatt + " Characteristic: " + characteristic);
-
                     }
 
                     @Override
