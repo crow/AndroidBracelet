@@ -19,7 +19,6 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.List;
@@ -49,59 +48,6 @@ public class BraceletMainActivity extends Activity {
     private SeekBar redBar, greenBar, blueBar, brightnessBar;
 
     /**
-     * The local bluetooth adapter, basic bluetooth interface
-     */
-    private BluetoothAdapter bluetoothAdapter;
-
-    /**
-     * The bluetooth generic attribute profile
-     */
-    private BluetoothGatt braceletBluetoothGatt;
-
-    /**
-     * The bluetooth generic attribute profile
-     */
-    private BluetoothGatt mantraBluetoothGatt;
-
-    /**
-     * The bluetooth send characteristic
-     */
-    private BluetoothGattCharacteristic braceletSendCharacteristic;
-
-    /**
-     * Service where to send data.
-     * Discovered empirically,
-     * it would be possible to find it programmatically by parsing the GATT messages.
-     */
-    private final String serviceUUID = "00002220-0000-1000-8000-00805f9b34fb";
-
-    /**
-     * Send Characteristic.
-     * Discovered empirically,
-     * it would be possible to find it programmatically by parsing the GATT messages.
-     */
-    private final String sendCharacteristicUUID = "00002222-0000-1000-8000-00805f9b34fb";
-
-    /**
-     * Receive Characteristic
-     * Discovered empirically,
-     * it would be possible to find it programmatically by parsing the GATT messages.
-     */
-    private final String receiveCharacteristicUUID = "00002221-0000-1000-8000-00805f9b34fb";
-
-    /**
-     * Client Config Characteristic
-     * Discovered empirically,
-     * it would be possible to find it programmatically by parsing the GATT messages.
-     */
-    private final String clientConfigCharacteristicUUID = "00002902-0000-1000-8000-00805f9b34fb";
-
-    /**
-     * Timeout for searching for an RFduino.
-     */
-    private static final long SCAN_TIMEOUT = 20000;
-
-    /**
      * Used to call functions asynchronously.
      */
     private Handler handler;
@@ -116,35 +62,6 @@ public class BraceletMainActivity extends Activity {
      */
     private boolean mantraConnected;
 
-    /**
-     * Max calibrated value for the breathing sensor
-     */
-    private int maxSensorValue;
-
-    /**
-     * Max calibrated value for the breathing sensor
-     */
-    private int minSensorValue;
-
-    /**
-     * Filtered sensor value
-     */
-    private int filteredSensorValue;
-
-    /**
-     * Sample window
-     */
-    private List<Integer> sampleWindow;
-
-    /**
-     * Filter window
-     */
-    private List<Integer> filterWindow;
-
-    /**
-     * Used for logging.
-     */
-    private static final String TAG = "Android Bracelet";
 
     public BraceletMainActivity(){
         super();
@@ -158,104 +75,20 @@ public class BraceletMainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bracelet_main);
 
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         connectBraceletButton = (Button) findViewById(R.id.connectBraceletButton);
         connectMantraButton = (Button) findViewById(R.id.connectMantraButton);
-
-        // Initialize 400 sample array
-        sampleWindow = new ArrayList<>(400);
-
-        // Initialize 15 sample filter window
-        filterWindow = new ArrayList<>(15);
 
         connectMantraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!mantraConnected) {
-                    //If not connected, let's look for Mantra and connect to it
-                    connectMantraButton.setEnabled(false);
-                    bluetoothAdapter.startLeScan(handleMantraScan);
-
-                    //Program a to stop the scanning after some seconds
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (!mantraConnected) {
-                                //Cancel scan only if not connected
-                                Log.d(TAG, "Mantra scanning timed out, stopping the scan");
-                                bluetoothAdapter.stopLeScan(handleMantraScan);
-                                //All graphical things must be run on the UI thread:
-                                BraceletMainActivity.this.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        connectMantraButton.setEnabled(true);
-                                        mantraConnected = false;
-                                        connectMantraButton.setText(R.string.connectMantra);
-                                    }
-                                });
-                            }
-                        }
-                    }, SCAN_TIMEOUT);
-
-                } else {
-                    //If connected, the same button is used for disconnecting
-                    mantraConnected = false;
-                    connectMantraButton.setText(R.string.connectMantra);
-
-                    redBar.setEnabled(false);
-                    greenBar.setEnabled(false);
-                    blueBar.setEnabled(false);
-                    brightnessBar.setEnabled(false);
-
-
-                    if (mantraBluetoothGatt != null)
-                        mantraBluetoothGatt.disconnect();
-                }
+               //TODO call connectMantra on service
             }
         });
 
         connectBraceletButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!braceletConnected){
-                    //If not connected, let's look for RFduino and connect to it
-                    connectBraceletButton.setEnabled(false);
-                    bluetoothAdapter.startLeScan(handleBraceletScan);
-
-                    //Program a to stop the scanning after some seconds
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            if(!braceletConnected){
-                                //Cancel scan only if not connected
-                                Log.d(TAG, "Bracelet scanning timed out, stopping the scan");
-                                bluetoothAdapter.stopLeScan(handleBraceletScan);
-                                //All graphical things must be run on the UI thread:
-                                BraceletMainActivity.this.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        connectBraceletButton.setEnabled(true);
-                                        braceletConnected = false;
-                                        connectBraceletButton.setText(R.string.connectBracelet);
-                                    }
-                                });
-                            }
-                        }
-                    }, SCAN_TIMEOUT);
-
-                } else {
-                    //If connected, the same button is used for disconnecting
-                    braceletConnected = false;
-                    connectBraceletButton.setText(R.string.connectBracelet);
-
-                    redBar.setEnabled(false);
-                    greenBar.setEnabled(false);
-                    blueBar.setEnabled(false);
-                    brightnessBar.setEnabled(false);
-
-                    if(braceletBluetoothGatt != null)
-                        braceletBluetoothGatt.disconnect();
-                }
+                //TODO call to connectBracelet on service
             }
         });
 
