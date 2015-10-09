@@ -1,10 +1,14 @@
 <resources>
     <string name="app_name">Bracelet</string>
     <string name="action_settings">Settings</string>
-    <string name="title_activity_rfduino">RFDuinoRGB</string>
-    <string name="connect">Connect</string>
+    <string name="title_activity_rfduino">Android Bracelet</string>
+    <string name="connectMantra">Connect Mantra</string>
+    <string name="connectBracelet">Connect Bracelet</string>
     <string name="red">Red</string>
     <string name="green">Green</string>
     <string name="blue">Blue</string>
-    <string name="disconnect">Disconnect</string>
+    <string name="brightness">Brightness</string>
+    <string name="disconnectMantra">Disconnect Mantra</string>
+    <string name="disconnectBracelet">Disconnect Bracelet</string>
+
 </resources>
