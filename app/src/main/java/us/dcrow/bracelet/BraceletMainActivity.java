@@ -1,36 +1,25 @@
 package us.dcrow.bracelet;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothAdapter.LeScanCallback;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothProfile;
-import android.graphics.Color;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
+import android.os.IBinder;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
-
-import java.util.Collections;
-import java.util.ConcurrentModificationException;
-import java.util.List;
-import java.util.UUID;
-
+import android.widget.Toast;
 
 
 /**
  *
  *
  */
-public class BraceletMainActivity extends Activity {
+public class BraceletMainActivity extends Activity implements BraceletService.BraceletServiceInterface {
 
     /**
      * Scan/connect button for the Bracelet
@@ -63,6 +52,44 @@ public class BraceletMainActivity extends Activity {
     private boolean mantraConnected;
 
 
+    public static final int CONNECTION_STATE_DISCONNECTED = 0;
+    public static final int CONNECTION_STATE_CONNECTING = 1;
+    public static final int CONNECTION_STATE_CONNECTED = 2;
+
+    BraceletService braceletService;
+
+    Intent serviceIntent;
+
+    // Bracelet Service Interface
+    @Override
+    public void braceletConnectionStateChanged(int state) {
+
+
+    }
+
+    @Override
+    public void mantraConnectionStateChanged(int state) {
+
+    }
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            Toast.makeText(BraceletMainActivity.this, "onServiceConnected called", Toast.LENGTH_SHORT).show();
+            // We've binded to LocalService, cast the IBinder and get LocalService instance
+            BraceletService.LocalBinder binder = (BraceletService.LocalBinder) service;
+            braceletService = binder.getServiceInstance(); //Get instance of your service!
+            braceletService.registerClient(BraceletMainActivity.this); //Activity register in the service as client for callabcks!
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            Toast.makeText(BraceletMainActivity.this, "onServiceDisconnected called", Toast.LENGTH_SHORT).show();
+        }
+    };
+
     public BraceletMainActivity(){
         super();
         mantraConnected = false;
@@ -75,22 +102,29 @@ public class BraceletMainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bracelet_main);
 
+        // Start and bind to braceletService
+        serviceIntent = new Intent(this, BraceletService.class);
+        startService(serviceIntent); //Starting the service
+        bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE); //Binding to the service!
+
         connectBraceletButton = (Button) findViewById(R.id.connectBraceletButton);
         connectMantraButton = (Button) findViewById(R.id.connectMantraButton);
 
-        connectMantraButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-               //TODO call connectMantra on service
-            }
-        });
 
         connectBraceletButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO call to connectBracelet on service
+                // call connectBracelet on service
             }
         });
+
+        connectMantraButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               // call connectMantra on service
+            }
+        });
+
 
         redBar = (SeekBar) findViewById(R.id.redBar);
         redBar.setEnabled(false);
@@ -127,7 +161,7 @@ public class BraceletMainActivity extends Activity {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress,
                                       boolean fromUser) {
-            //When the value of a bar changes, send the values to RFduino
+            //When the value of a bar changes, send the values to intent service
             sendColor();
         }
     };
@@ -447,17 +481,14 @@ public class BraceletMainActivity extends Activity {
             }
         }
     };
+    //TODO make stop service button that makes this call: stopService(serviceIntent);
 
+    // TODO move this to service onStop
     @Override
     protected void onStop() {
         super.onStop();
-        //When the application stops we disconnect
-        bluetoothAdapter.stopLeScan(handleMantraScan);
-        bluetoothAdapter.stopLeScan(handleBraceletScan);
-        if(braceletBluetoothGatt != null)
-            braceletBluetoothGatt.disconnect();
-        if(mantraBluetoothGatt != null)
-            mantraBluetoothGatt.disconnect();
+
+        unbindService(mConnection);
     }
 
 }

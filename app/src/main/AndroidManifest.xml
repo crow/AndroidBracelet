@@ -19,7 +19,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
 
-        <service android:name="BraceletService" />
+        <service android:name=".BraceletService" />
 
         <activity
 

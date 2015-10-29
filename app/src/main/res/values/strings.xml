@@ -10,5 +10,5 @@
     <string name="brightness">Brightness</string>
     <string name="disconnectMantra">Disconnect Mantra</string>
     <string name="disconnectBracelet">Disconnect Bracelet</string>
-
+    <string name="braceletServiceStarted">Bracelet Service Started</string>
 </resources>
