@@ -16,9 +16,8 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Toast;
 
-
 /**
- *
+ * Main Bracelet management view
  *
  */
 public class BraceletMainActivity extends Activity implements BraceletService.BraceletServiceInterface {
@@ -59,8 +58,6 @@ public class BraceletMainActivity extends Activity implements BraceletService.Br
     private static final int COLOR_SETTING_BRIGHTNESS_ONLY = 1;
 
     private static final int COLOR_SETTING_ENABLED = 2;
-
-
 
 
     BraceletService braceletService;
@@ -275,6 +272,11 @@ public class BraceletMainActivity extends Activity implements BraceletService.Br
         connectBraceletButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (braceletConnected) {
+                    braceletService.disconnectBracelet();
+                    return;
+                }
+
                 braceletService.connectBracelet();
             }
         });
@@ -282,6 +284,11 @@ public class BraceletMainActivity extends Activity implements BraceletService.Br
         connectMantraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (mantraConnected) {
+                    braceletService.disconnectMantra();
+                    return;
+                }
+
                 braceletService.connectMantra();
             }
         });
@@ -325,10 +332,7 @@ public class BraceletMainActivity extends Activity implements BraceletService.Br
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress,
                                       boolean fromUser) {
-
-            if (braceletConnected) {
-                braceletService.updateColor(redBar.getProgress(), greenBar.getProgress(), blueBar.getProgress(), brightnessBar.getProgress());
-            }
+            braceletService.updateColor(redBar.getProgress(), greenBar.getProgress(), blueBar.getProgress(), brightnessBar.getProgress());
         }
     };
 

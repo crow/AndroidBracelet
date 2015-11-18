@@ -26,6 +26,10 @@ import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Bracelet background bluetooth management service
+ *
+ */
 public class BraceletService extends IntentService {
 
     /**
@@ -119,10 +123,10 @@ public class BraceletService extends IntentService {
     /**
      * Latest color and brightness values
      */
-    private int r = 0;
-    private int g = 0;
-    private int b = 0;
-    private int a = 0;
+    private int r = 255;
+    private int g = 255;
+    private int b = 255;
+    private int a = 10;
 
 
     /**
@@ -196,24 +200,30 @@ public class BraceletService extends IntentService {
 
         mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 
-        // Display a notification about starting.  We put an icon in the status bar.
-        showNotification();
+
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         lastStartId = startId;
 
+        // Display a notification about starting.  We put an icon in the status bar.
+        showNotification(getString(R.string.braceletServiceStarted));
+
         return START_STICKY;
     }
 
-    public void connectBracelet () {
+        public void disconnectBracelet () {
+            Log.d(TAG, "Bracelet scanning manually stopped");
+            bluetoothAdapter.stopLeScan(handleBraceletScan);
+            braceletConnected = false;
+            activity.braceletConnectionStateChanged(BluetoothProfile.STATE_DISCONNECTED);
+        }
+
+
+        public void connectBracelet () {
 
         if (!braceletConnected) {
-            //If not connected, let's look for RFduino and connect to it
-            // TODO disable connectBracelet button
-            //connectBraceletButton.setEnabled(false);
-
             bluetoothAdapter.startLeScan(handleBraceletScan);
             activity.braceletConnectionStateChanged(BluetoothProfile.STATE_CONNECTING);
 
@@ -246,6 +256,13 @@ public class BraceletService extends IntentService {
             }
         }
 
+    }
+
+    public void disconnectMantra () {
+        Log.d(TAG, "Bracelet scanning manually stopped");
+        bluetoothAdapter.stopLeScan(handleMantraScan);
+        mantraConnected = false;
+        activity.mantraConnectionStateChanged(BluetoothProfile.STATE_DISCONNECTED);
     }
 
     public void connectMantra () {
@@ -299,14 +316,16 @@ public class BraceletService extends IntentService {
             mantraBluetoothGatt.disconnect();
         }
 
+        stopSelf();
+        showNotification(getString(R.string.braceletServiceStopped));
     }
 
     /**
      * Show a notification while this service is running.
      */
-    private void showNotification() {
+    private void showNotification(String notificationString) {
         // In this sample, we'll use the same text for the ticker and the expanded notification
-        CharSequence text = getText(R.string.braceletServiceStarted);
+        CharSequence text = notificationString;
 
         // The PendingIntent to launch our activity if the user selects this notification
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
@@ -316,7 +335,7 @@ public class BraceletService extends IntentService {
         Notification notification = new Notification.Builder(this)
                 .setTicker(text)  // the status text
                 .setWhen(System.currentTimeMillis())  // the time stamp
-                .setContentTitle(getText(R.string.braceletServiceStarted))  // the label of the entry
+                .setContentTitle(notificationString)  // the label of the entry
                 .setContentText(text)  // the contents of the entry
                 .setContentIntent(contentIntent)  // The intent to send when the entry is clicked
                 .build();

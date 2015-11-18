@@ -29,7 +29,8 @@
         android:text="@string/connectBracelet"
         android:layout_marginTop="51dp"
         android:layout_below="@+id/brightnessBar"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignEnd="@+id/connectMantraButton"
+        android:layout_alignParentStart="true"/>
 
     <Button
         android:id="@+id/connectMantraButton"
@@ -37,8 +38,8 @@
         android:layout_height="wrap_content"
         android:text="@string/connectMantra"
         android:layout_below="@+id/connectBraceletButton"
-        android:layout_alignEnd="@+id/connectBraceletButton"
-        android:layout_alignStart="@+id/connectBraceletButton" />
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"/>
 
 
     <TextView
@@ -47,7 +48,7 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/redBar"
         android:layout_below="@+id/redBar"
-        android:layout_marginTop="22dp"
+        android:layout_marginTop="20dp"
         android:text="@string/green" />
 
     <SeekBar
@@ -77,16 +78,17 @@
         android:id="@+id/brightnessBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_alignParentStart="true" />
+        android:layout_below="@+id/brightnessLabel"
+        android:layout_alignParentStart="true"/>
 
     <TextView
         android:id="@+id/brightnessLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/brightness"
-        android:layout_above="@+id/brightnessBar"
-        android:layout_alignParentStart="true" />
+        android:layout_below="@+id/blueBar"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="20dp"/>
 
 </RelativeLayout>
 

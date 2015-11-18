@@ -13,5 +13,7 @@
     <string name="disconnectBracelet">Disconnect Bracelet</string>
     <string name="disconnecting">Disconnecting...</string>
 
-    <string name="braceletServiceStarted">Bracelet Service Started</string>
+    <string name="braceletServiceStarted">Background Bracelet Service Started</string>
+    <string name="braceletServiceStopped">Background Bracelet Service Stopped</string>
+
 </resources>
